@@ -68,7 +68,8 @@ tr:last-child td { border-bottom: 0; }
 .t-string { color: #2563eb; } .t-number { color: #b45309; } .t-boolean { color: #7c3aed; } .t-date { color: #0f766e; } .t-manual { color: var(--accent); }
 
 /* Tablero de mapeo */
-.board { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(360px, 1.3fr); gap: 28px; align-items: start; }
+.board { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 28px; align-items: start; }
+.col, .panel, .field, .slot, .drop { min-width: 0; }
 .col h3 { margin-top: 4px; } .col > input[type=search] { margin-bottom: 8px; }
 .counter { font-weight: 500; font-size: .8rem; color: var(--muted); margin-left: 6px; }
 .chip-list, .slot-list { display: grid; gap: 6px; max-height: 62vh; overflow: auto; padding: 2px; }
@@ -88,7 +89,7 @@ tr:last-child td { border-bottom: 0; }
 .drop:not(.has-value) { border: 1.5px dashed var(--border); border-radius: 8px; padding: 4px 8px; flex-wrap: wrap; }
 .drop .placeholder { color: var(--muted); font-size: .85rem; flex: 1 1 160px; } .drop .constant { flex: 1 1 140px; width: auto; padding: 5px 8px; font-size: .85rem; }
 .drop select { width: auto; flex: 1; min-width: 120px; padding: 5px 8px; font-size: .85rem; } .arrow { color: var(--accent); font-weight: 700; }
-.add-field { display: flex; gap: 8px; margin-top: 10px; } .add-field input { flex: 1; }
+.add-field { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; } .add-field input { flex: 1 1 160px; width: auto; }
 
 /* Ejecución */
 .run-controls { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
@@ -114,6 +115,6 @@ details pre { margin: 6px 0 0; padding: 8px; background: var(--surface-2); borde
 .toast { padding: 10px 16px; border-radius: 10px; background: var(--text); color: var(--bg); box-shadow: var(--shadow); max-width: 360px; } .toast.error { background: var(--bad); color: #fff; } .toast.ok { background: var(--ok); color: #fff; }
 
 @media (max-width: 820px) {
-  .topbar, .steps, .main { padding-left: 14px; padding-right: 14px; } .form-grid, .board { grid-template-columns: 1fr; } .cfg input[type=text], .cfg select { width: 100%; } .cfg { width: 100%; }
+  .topbar, .steps, .main { padding-left: 14px; padding-right: 14px; } .form-grid, .board { grid-template-columns: minmax(0, 1fr); } .panel { padding: 16px; } .chip-list, .slot-list { max-height: none; overflow: visible; } .cfg input[type=text], .cfg select { width: 100%; } .cfg { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
