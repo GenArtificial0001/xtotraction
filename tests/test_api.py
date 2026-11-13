@@ -82,7 +82,7 @@ def test_validaciones_y_meta(client):
 
 
 def test_frontend_estatico_y_sin_path_traversal(client):
-    assert "Traction Sync" in client.get("/").text
+    assert "xtox" in client.get("/").text
     assert client.get("/shared/HarParser.js").status_code == 200
     assert client.get("/%2e%2e/backend/main.py").status_code == 404
     assert client.get("/../backend/main.py").status_code == 404

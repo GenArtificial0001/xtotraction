@@ -1,6 +1,6 @@
-# Traction Sync
+# xtox
 
-Lleva datos de **cualquier origen** (una lista de SharePoint, otra web…) a **Traction u otro destino**, uniendo cada campo con
+**xtox** («x a x»): lleva datos de **cualquier origen** (una lista de SharePoint, otra web…) a **Traction u otro destino**, uniendo cada campo con
 **drag & drop** (o con un toque, en el celular). Frontend en HTML/CSS/JavaScript y backend en **Python + FastAPI**.
 
 ```bash

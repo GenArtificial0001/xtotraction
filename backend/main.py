@@ -28,7 +28,7 @@ def create_app(data_dir: str | Path | None = None, registry: ConnectorRegistry |
                deps: dict | None = None, serve_frontend: bool = True) -> FastAPI:
     repo = FileConfigRepository(data_dir or os.environ.get("DATA_DIR") or ROOT / "data")
     service = SyncService(registry or create_default_registry(), repo, deps=deps)
-    app = FastAPI(title="Traction Sync", docs_url="/api/docs", openapi_url="/api/openapi.json")
+    app = FastAPI(title="xtox", docs_url="/api/docs", openapi_url="/api/openapi.json")
     app.state.service, app.state.repo = service, repo
 
     # ---- errores → {"error": "..."} (lo que espera el frontend)

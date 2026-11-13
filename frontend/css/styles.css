@@ -1,4 +1,4 @@
-/* Traction Sync · azul corporativo con degradado.
+/* xtox · azul corporativo con degradado.
    Layout: franja degradada (marca, configuración y pasos) sobre un lienzo azulado claro; el contenido va en una sola tarjeta por paso. */
 :root {
   --navy: #00095b; --blue-deep: #003478; --blue: #1351b4; --sky: #8db6f5;
@@ -48,7 +48,7 @@ p { margin: 0; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .logo { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .3); }
 .logo .icon { width: 22px; height: 22px; stroke-width: 2.2; }
-.brand-t { display: grid; line-height: 1.15; } .brand-t b { font: 700 1.3rem var(--head); letter-spacing: .02em; } .brand-t small { color: rgba(255, 255, 255, .72); font-size: .78rem; }
+.brand-t { display: grid; line-height: 1.15; } .brand-t b { font: 700 1.6rem var(--head); letter-spacing: .03em; } .brand-t small { color: rgba(255, 255, 255, .72); font-size: .78rem; }
 .cfg { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .hero input, .hero select { background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .3); color: #fff; }
 .hero input::placeholder { color: rgba(255, 255, 255, .6); } .hero select option { color: #0a1530; background: #fff; }

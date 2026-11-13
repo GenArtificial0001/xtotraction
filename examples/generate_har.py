@@ -17,7 +17,7 @@ traction_body = {"name": "ejemplo", "description": "", "status": "active", "star
 
 
 def har(entries):
-    return {"log": {"version": "1.2", "creator": {"name": "ejemplo-traction-sync", "version": "1"}, "entries": entries}}
+    return {"log": {"version": "1.2", "creator": {"name": "ejemplo-xtox", "version": "1"}, "entries": entries}}
 
 
 (HERE / "origen-demo.har").write_text(json.dumps(har([
