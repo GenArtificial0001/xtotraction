@@ -91,7 +91,7 @@ export class HarEntry {
     let sample = [];
     const text = this.responseText;
     if (!text) {
-      warnings.push('Esta captura no incluye el cuerpo de la respuesta (exporta el HAR con contenido). Usa «Probar» para traer los campos en vivo.');
+      warnings.push('Lo importado no incluye el cuerpo de la respuesta (si es un HAR, expórtalo «con contenido»). Pulsa «Probar y traer campos» para obtenerlos en vivo.');
     } else {
       try {
         const json = JSON.parse(text);
@@ -124,7 +124,7 @@ export class HarEntry {
     const text = this.requestBodyText;
     const mime = this.requestMimeType;
     if (!text) {
-      warnings.push('Esta petición no tiene cuerpo. Elige la petición que crea/edita un registro (POST/PUT/PATCH).');
+      warnings.push('Esta petición no tiene cuerpo. Usa la que crea/edita un registro (POST/PUT/PATCH).');
     } else if (/multipart\//i.test(mime)) {
       warnings.push('El cuerpo es multipart/form-data, aún no soportado. Usa una petición JSON o x-www-form-urlencoded.');
     } else if (/x-www-form-urlencoded/i.test(mime)) {
@@ -181,4 +181,14 @@ export class HarParser {
       { creator: har.log.creator?.name, version: har.log.version },
     );
   }
+}
+
+/** Entrada sintética a partir de un JSON pegado a mano: respuesta de ejemplo (origen) o cuerpo de petición (destino). */
+export function entryFromJsonSample(text, role) {
+  const trimmed = text.trim();
+  JSON.parse(trimmed); // lanza si no es JSON
+  const raw = role === 'target'
+    ? { request: { method: 'POST', url: '', headers: [], postData: { mimeType: 'application/json', text: trimmed } }, response: { status: 0, content: {} } }
+    : { request: { method: 'GET', url: '', headers: [] }, response: { status: 200, content: { mimeType: 'application/json', text: trimmed } } };
+  return new HarEntry(raw, 0);
 }

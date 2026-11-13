@@ -1,5 +1,6 @@
 import { h, clear, truncate } from './dom.js';
-import { HarParser } from '/shared/HarParser.js';
+import { HarParser, entryFromJsonSample } from '/shared/HarParser.js';
+import { CurlParser } from '/shared/CurlParser.js';
 
 /**
  * Diálogo de importación de .har. El archivo se interpreta en el navegador
@@ -18,6 +19,8 @@ export class HarModal {
     this.role = role;
     this.onPick = onPick;
     this.doc = null;
+    this.error = null;
+    this.pasteText = '';
     this.render();
     this.dialog.showModal();
   }
@@ -34,6 +37,21 @@ export class HarModal {
       this.error = err.message;
     }
     this.render();
+  }
+
+  #analyzePaste(text) {
+    const t = text.trim();
+    try {
+      if (!t) throw new Error('Pega primero el texto a analizar.');
+      if (CurlParser.looksLikeCurl(t)) { this.#pick(CurlParser.toHarEntry(t)); return; }
+      if (/^[[{]/.test(t)) {
+        let json;
+        try { json = JSON.parse(t); } catch { throw new Error('El JSON pegado no es válido (¿se cortó al copiar?).'); }
+        if (json?.log?.entries) { this.doc = HarParser.parse(json); this.fileName = 'texto pegado'; this.error = null; this.render(); return; }
+        this.#pick(entryFromJsonSample(t, this.role)); return;
+      }
+      throw new Error('No reconozco el texto. Pega un comando curl, un HAR o un JSON.');
+    } catch (err) { this.error = err.message; this.render(); }
   }
 
   render() {
@@ -55,7 +73,14 @@ export class HarModal {
       h('button', { class: 'icon-btn close', type: 'button', 'aria-label': 'Cerrar', onclick: () => this.close() }, '✕'),
     );
 
-    const body = h('div', { class: 'har-body' }, drop, this.error && h('p', { class: 'error' }, this.error));
+    const area = h('textarea', { id: 'har-paste-text', rows: 5, spellcheck: false, class: 'mono', value: this.pasteText,
+      placeholder: "curl 'https://…' -H 'authorization: …'\n— o un HAR completo — o un JSON de ejemplo",
+      oninput: (e) => { this.pasteText = e.target.value; } });
+    const paste = h('div', { class: 'har-paste' },
+      h('label', { for: 'har-paste-text' }, h('strong', {}, 'O pega el texto'),
+        h('span', { class: 'muted' }, 'Un comando «curl» (Copiar como cURL en el navegador), el contenido de un HAR o un JSON de ejemplo')),
+      area, h('button', { class: 'btn small primary', type: 'button', onclick: () => this.#analyzePaste(area.value) }, 'Analizar texto'));
+    const body = h('div', { class: 'har-body' }, drop, paste, this.error && h('p', { class: 'error', role: 'alert' }, this.error));
     if (this.doc) body.append(this.#renderList());
     this.dialog.append(h('form', { method: 'dialog' }, header, fileInput, body));
     this.dialog.querySelector('form').addEventListener('submit', (e) => e.preventDefault());

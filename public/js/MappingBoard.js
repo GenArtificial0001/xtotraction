@@ -1,4 +1,5 @@
 import { h, clear, truncate } from './dom.js';
+import { FieldPicker } from './FieldPicker.js';
 
 const display = (path) => path.replace(/\\\./g, '.');
 
@@ -12,6 +13,7 @@ export class MappingBoard {
     this.toast = toast;
     this.selected = null;
     this.search = '';
+    this.picker = new FieldPicker();
     this.root = h('section', { class: 'panel', id: 'panel-mapping', 'aria-labelledby': 'h-mapping' });
     state.on(['mappings', 'fields', 'all'], () => this.render());
     state.on(['mappings-quiet'], () => this.#renderCounter());
@@ -25,7 +27,7 @@ export class MappingBoard {
       h('div', { class: 'panel-head' },
         h('div', {},
           h('h2', { id: 'h-mapping' }, '3 · Une origen y destino'),
-          h('p', { class: 'muted' }, 'Arrastra un campo de origen y suéltalo en el casillero del campo destino. También puedes pulsar el campo y luego el casillero.'),
+          h('p', { class: 'muted' }, 'Arrastra un campo de origen hasta el casillero del campo destino, o toca «Elegir campo» en el casillero (ideal en celular).'),
         ),
         h('div', { class: 'btn-row' },
           h('button', { class: 'btn', type: 'button', onclick: () => { const n = s.autoMap(); this.toast(n ? `${n} campo(s) emparejados por nombre` : 'No se encontraron coincidencias por nombre'); } }, '✨ Auto-mapear'),
@@ -104,7 +106,7 @@ export class MappingBoard {
         const src = e.dataTransfer.getData('application/x-source-field') || e.dataTransfer.getData('text/plain');
         if (src && s.config.source.fields.some((f) => f.path === src)) assign(src);
       },
-      onclick: (e) => { if (this.selected && !e.target.closest('select,input,button.unmap')) assign(this.selected); },
+      onclick: (e) => { if (this.selected && !e.target.closest('select,input,button')) assign(this.selected); },
     });
 
     const label = h('div', { class: 'slot-label' },
@@ -113,18 +115,21 @@ export class MappingBoard {
       t.custom && h('button', { class: 'icon-btn tiny', type: 'button', title: 'Quitar campo manual', 'aria-label': `Quitar ${t.path}`,
         onclick: (e) => { e.stopPropagation(); s.config.target.customFields = s.config.target.customFields.filter((p) => p !== t.path); s.unmap(t.path); s.emit('fields'); } }, '✕'));
 
+    const pick = () => this.picker.open({ targetPath: t.path, fields: s.config.source.fields, current: m?.source, onPick: (src) => assign(src) });
     let drop;
     if (m && m.source) {
       const sf = s.config.source.fields.find((f) => f.path === m.source);
       drop = h('div', { class: 'drop has-value' },
-        h('span', { class: 'chip static' }, h('span', { class: 'chip-name mono' }, display(m.source)), sf && h('span', { class: 'chip-sample' }, truncate(sf.sample, 28))),
+        h('button', { type: 'button', class: 'chip static', title: 'Cambiar campo de origen', 'aria-label': `Cambiar el origen de ${t.path} (ahora ${m.source})`, onclick: pick },
+          h('span', { class: 'chip-name mono' }, display(m.source)), sf && h('span', { class: 'chip-sample' }, truncate(sf.sample, 28))),
         h('span', { class: 'arrow', 'aria-hidden': 'true' }, '→'),
         h('select', { 'aria-label': `Transformación para ${t.path}`, onchange: (e) => s.setTransform(t.path, e.target.value) },
           s.meta.transforms.map((tr) => h('option', { value: tr.id, selected: tr.id === (m.transform || 'none') }, tr.label))),
         h('button', { class: 'icon-btn unmap', type: 'button', title: 'Quitar vínculo', 'aria-label': `Quitar vínculo de ${t.path}`, onclick: () => s.unmap(t.path) }, '✕'));
     } else {
       drop = h('div', { class: 'drop' },
-        h('span', { class: 'placeholder' }, 'Suelta aquí un campo de origen'),
+        h('button', { type: 'button', class: 'btn small pick-btn', onclick: pick }, 'Elegir campo ▾'),
+        h('span', { class: 'placeholder' }, 'o suelta aquí un campo'),
         h('input', { type: 'text', class: 'constant', placeholder: 'o escribe un valor fijo', value: m?.constant ?? '', 'aria-label': `Valor fijo para ${t.path}`,
           oninput: (e) => s.setConstant(t.path, e.target.value) }));
     }

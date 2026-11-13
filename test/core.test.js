@@ -128,3 +128,43 @@ test('SharePointListSource: construye la URL REST y detecta metadatos', () => {
   assert.equal(s.getNextUrl({}), null);
   assert.throws(() => new SharePointListSource({}).validate(), /URL del sitio/);
 });
+
+test('CurlParser: comillas, $\'…\', cabeceras, datos y método implícito', async () => {
+  const { CurlParser } = await import('../shared/CurlParser.js');
+  const cmd = `curl 'https://t.example.com/api/projects?x=1' \\
+  -H 'authorization: Bearer abc' \\
+  -H 'content-type: application/json' \\
+  -b 'sid=9' --compressed \\
+  --data-raw $'{"name":"it\\'s","owner":{"id":3}}'`;
+  const p = CurlParser.parse(cmd);
+  assert.equal(p.method, 'POST');
+  assert.equal(p.url, 'https://t.example.com/api/projects?x=1');
+  assert.equal(p.headers.authorization, 'Bearer abc');
+  assert.equal(p.headers.Cookie, 'sid=9');
+  assert.deepEqual(JSON.parse(p.body), { name: "it's", owner: { id: 3 } });
+
+  const tgt = CurlParser.toHarEntry(cmd).toTargetDraft();
+  assert.deepEqual(tgt.fields.map((f) => f.path), ['name', 'owner.id']);
+  assert.equal(tgt.config.method, 'POST');
+
+  const src = CurlParser.toHarEntry('curl "https://s.example.com/_api/items" -H "Accept: application/json" -X GET').toSourceDraft();
+  assert.equal(src.config.method, 'GET');
+  assert.equal(src.fields.length, 0);
+  assert.equal(src.warnings.length, 1);
+
+  assert.throws(() => CurlParser.parse('curl -H "a: b"'), /URL/);
+  assert.throws(() => CurlParser.parse("curl 'https://x -d"), /sin cerrar/);
+  assert.throws(() => CurlParser.parse('curl https://x -F a=@f'), /multipart/);
+  assert.equal(CurlParser.looksLikeCurl('  curl https://x'), true);
+  assert.equal(CurlParser.looksLikeCurl('{"a":1}'), false);
+});
+
+test('entryFromJsonSample: JSON pegado como respuesta (origen) o cuerpo (destino)', async () => {
+  const { entryFromJsonSample } = await import('../shared/HarParser.js');
+  const src = entryFromJsonSample('{"value":[{"Title":"a","Id":1}]}', 'source').toSourceDraft();
+  assert.deepEqual(src.fields.map((f) => f.path), ['Title', 'Id']);
+  assert.equal(src.config.itemsPath, 'value');
+  const tgt = entryFromJsonSample('{"name":"x","tags":[]}', 'target').toTargetDraft();
+  assert.deepEqual(tgt.fields.map((f) => f.path), ['name', 'tags']);
+  assert.throws(() => entryFromJsonSample('no json', 'source'));
+});

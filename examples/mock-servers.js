@@ -26,7 +26,7 @@ export function createMockSharePoint({ port = 4001, pageSize = 2 } = {}) {
   const server = http.createServer((req, res) => {
     if (req.headers.authorization !== `Bearer ${DEMO_TOKEN}`) return json(res, 401, { error: 'unauthorized' });
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
-    if (!/\/_api\/web\/lists\/getbytitle\('Proyectos'\)\/items$/.test(url.pathname)) return json(res, 404, { error: 'lista no encontrada' });
+    if (!/\/_api\/web\/lists\/getbytitle\('Proyectos'\)\/items$/.test(decodeURIComponent(url.pathname))) return json(res, 404, { error: 'lista no encontrada' });
     const skip = Number(url.searchParams.get('$skip') || 0);
     const slice = PROJECTS.slice(skip, skip + pageSize);
     const body = { 'odata.metadata': 'demo', value: slice };

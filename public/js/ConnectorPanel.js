@@ -88,6 +88,7 @@ export class ConnectorPanel {
 
   #importHar() {
     this.harModal.open(this.role, (draft) => {
+      if (!draft.config.url) delete draft.config.url;
       const noise = this.state.descriptor(this.role).noisePattern;
       if (noise) draft.fields = draft.fields.filter((f) => !new RegExp(noise, 'i').test(f.path));
       this.state.applyDraft(this.role, draft);
